@@ -28,3 +28,7 @@ results/
 
 # Previous year reference — excluded from version control
 Publication_Data_Collection_2025/
+
+# Claude / BMAD tooling — not part of the project
+.claude/
+_bmad/
