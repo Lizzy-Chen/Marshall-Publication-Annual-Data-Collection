@@ -192,8 +192,13 @@ def run() -> Path | None:
     print(f"  ScholarGPS URLs    : {len(df_out) - need_sgps} / {len(df_out)}")
     if not_found:
         print(f"  ⚠  Not in master list: {not_found} (check spelling / email)")
-    if need_wos:
-        print(f"\n  Action required: open {out_path.name} and fill in missing WoS IDs (highlighted rows).")
+    if need_wos or need_sgps:
+        items = []
+        if need_wos:
+            items.append("WoS IDs")
+        if need_sgps:
+            items.append("ScholarGPS URLs")
+        print(f"\n  Action required: open {out_path.name} and fill in missing {' and '.join(items)} (highlighted rows).")
 
     return out_path
 
@@ -224,7 +229,11 @@ def _format_excel(path: Path, df: pd.DataFrame) -> None:
     # Data rows
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
         comment_val = str(row[comments_col_idx - 1].value or "")
-        needs_action = "NEED WoS ID" in comment_val or "NOT FOUND" in comment_val
+        needs_action = (
+            "NEED WoS ID" in comment_val
+            or "NEED ScholarGPS URL" in comment_val
+            or "NOT FOUND" in comment_val
+        )
 
         for cell in row:
             cell.border    = BORDER

@@ -2,9 +2,9 @@
 
 ## Status
 
-> **Not active in 2026.** The ScholarGPS module is maintained in the codebase for future use,
-> but is not included in the default "Run All Active" option due to frequent CAPTCHA interruptions
-> that require manual intervention. It can be run at any time by selecting **[3]** in `main.py`.
+> **Active in 2026.** ScholarGPS is included alongside WoS and Google Scholar. Select **[3]** in
+> `main.py` to run it, or **[A]** to run all three sources together. Note that ScholarGPS requires
+> manual CAPTCHA solving — budget 30–60 minutes and keep the terminal open during the run.
 
 ---
 

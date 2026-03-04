@@ -3,8 +3,8 @@ sources/scholargps/extractor.py
 --------------------------------
 Extracts publication data from ScholarGPS using Selenium browser automation.
 
-STATUS: Maintained but NOT active in 2026.
-        Select option [3] in main.py to use this source.
+STATUS: Active in 2026.
+        Select option [3] in main.py to run, or [A] to run all sources.
 
 IMPORTANT: ScholarGPS requires manual CAPTCHA solving.
   When a CAPTCHA appears, the script pauses and prints a message.

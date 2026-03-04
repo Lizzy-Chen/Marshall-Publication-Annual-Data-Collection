@@ -15,8 +15,6 @@ you want to run (comma-separated), or press A for all active sources.
 Active sources in 2026:
   [1] Web of Science (WoS)     — via Clarivate REST API
   [2] Google Scholar           — via SerpAPI (auto-generates Top-N list after run)
-
-Inactive (kept for reference):
   [3] ScholarGPS               — via Selenium (requires manual CAPTCHA solving)
 
 Utilities:
@@ -46,7 +44,7 @@ from utils                import generate_top_N_faculty as top_n_gen
 SOURCES = {
     "1": ("Web of Science (WoS)",     wos_ext,   wos_agg,   True),
     "2": ("Google Scholar",           gs_ext,    gs_agg,    True),
-    "3": ("ScholarGPS ⚠  (manual CAPTCHA required)", sgps_ext, sgps_agg, False),
+    "3": ("ScholarGPS ⚠  (manual CAPTCHA required)", sgps_ext, sgps_agg, True),
 }
 
 # Source keys that map to credential validation IDs
@@ -74,7 +72,7 @@ def _print_menu() -> None:
         status = "" if active else "  [not active in 2026]"
         print(f"  [{key}] {name}{status}")
     print()
-    print("  [A] Run all ACTIVE sources (WoS + Google Scholar)")
+    print("  [A] Run all ACTIVE sources (WoS + Google Scholar + ScholarGPS)")
     print("  [C] Cross-source comparison only (requires 2+ sources already run)")
     print(f"  [G] Generate Top-{config.TOP50_N} faculty list from existing GS results")
     print("  [Q] Quit")

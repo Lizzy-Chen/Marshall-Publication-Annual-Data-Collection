@@ -2,8 +2,7 @@
 
 Automated pipeline for extracting, aggregating, and comparing publication and citation data for Marshall School of Business faculty from multiple academic databases.
 
-**Active sources:** Web of Science (WoS), Google Scholar
-**Kept but not active:** ScholarGPS (requires manual CAPTCHA solving)
+**Active sources:** Web of Science (WoS), Google Scholar, ScholarGPS
 
 
 
@@ -47,59 +46,92 @@ Before running the pipeline, update the faculty list for the new year:
 
 ## Running the Pipeline
 
-**1. Set up virtual environment and install dependencies (first time only)**
+1. **Set up virtual environment and install dependencies (first time only)**
 
-```bash
-# From the project root
-python3 -m venv venv
-source venv/bin/activate
-pip install -r code/requirements.txt
-```
+   ```python
+   # From the project root
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r code/requirements.txt
+   ```
 
-> **Each new terminal session:** run `source venv/bin/activate` from the project root before running any pipeline commands.
+   > **Each new terminal session:** run `source venv/bin/activate` from the project root before running any pipeline commands.
 
-**2. Set up credentials (first time only)**
+2. **Set up credentials (first time only)**
 
-```bash
-cp code/.env.example code/.env
-# Open code/.env and fill in your API keys (see below)
-```
+   ```python
+   cp code/.env.example code/.env
+   # Open code/.env and fill in your API keys (see below)
+   ```
 
-- **WoS API key (`WOS_API_KEY`)**
-
-  - Register at the [Clarivate Developer Portal](https://developer.clarivate.com/)
-
-  - Subscribe to the [Web of Science Starter API](https://developer.clarivate.com/apis/wos-starter)
-
-  - Once approved, copy your API key from the application details page
-
-- **Google Scholar / SerpAPI key (`SERPAPI_KEY`)**
-
-  - Log in at [https://serpapi.com/dashboard](https://serpapi.com/dashboard)
-    - Account: avdresearch@marshall.usc.edu
+   - **WoS API key (`WOS_API_KEY`)**
+     - Register at the [Clarivate Developer Portal](https://developer.clarivate.com/)
+     - Subscribe to the [Web of Science Starter API](https://developer.clarivate.com/apis/wos-starter)
+     - Once approved, copy your API key from the application details page
 
 
-  - Copy your API key from the dashboard
+     - **Google Scholar / SerpAPI key (`SERPAPI_KEY`)**
 
-**3. Run Google Scholar first**
+       - Log in at [https://serpapi.com/dashboard](https://serpapi.com/dashboard)
+       - Account: avdresearch@marshall.usc.edu
+       - Copy your API key from the dashboard
 
-```bash
-cd code
-python main.py   # select [2] Google Scholar
-```
 
-- Covers all faculty. When it finishes, **automatically generates** `data/Top_N_Faculty_{year}.xlsx` — the input list for WoS.
+3. **Run the Pipeline (`main.py`)**
 
-**4. Review the Top-N list**
+   ```python
+   cd code
+   python main.py   
+   ```
 
-- Open `data/Top_N_Faculty_{year}.xlsx`. Gold-highlighted rows need attention: fill in any missing **WoS ResearchID**.
+   You should see the interactive menu:
 
-**5. Run WoS**
+   <img src="doc_graph/sample_menu.png" alt="sample_menu" style="zoom:50%;" />
 
-```bash
-cd code
-python main.py   # select [1] Web of Science
-```
+   Select [2] ro tun Google Scholar First. 
+
+   Google Scholar extraction:
+
+   - Covers **all faculty** from the master list
+   - Collects publication + citation data for the configured 5-year window
+   - Automatically generates: `data/Top_N_Faculty_{year}.xlsx` — the input list for WoS.
+
+4. **Review the Top-N list**
+   - Open `data/Top_N_Faculty_{year}.xlsx`. 
+   - Gold-highlighted rows need attention: fill in any missing **WoS ResearchID**.
+
+
+5. **Run WoS**
+
+   After confirming the Top-N list is complete, run `main.py` again:
+
+   ```bash
+   cd code
+   python main.py   # select [1] Web of Science
+   ```
+
+   The WoS stage will:
+
+   - Extract publications for Top-N faculty
+   - Filter to the configured 5-year window
+   - Generate ranked citation outputs
+   - Log any missing or invalid IDs
+
+6. **Run ScholarGPS** *(requires manual CAPTCHA solving — keep terminal open)*
+
+   ScholarGPS also uses the Top-N faculty list. Before running, ensure ChromeDriver is installed
+   and matches your Chrome version (see `docs/scholargps_documentation_2026.md` for setup).
+
+   ```bash
+   cd code
+   python main.py   # select [3] ScholarGPS
+   ```
+
+   When a CAPTCHA appears in the Chrome window, solve it manually, then press **Enter** in the
+   terminal to resume. Budget 30–60 minutes depending on how often CAPTCHAs appear.
+
+   > **Tip:** You can also run all three sources in one go with **[A]**, but you must stay at the
+   > terminal to handle any CAPTCHAs during the ScholarGPS stage.
 
 
 
@@ -136,7 +168,7 @@ Publication_Data_Collection_{year}/
 │   ├── sources/
 │   │   ├── wos/                       ← Web of Science (API)
 │   │   ├── google_scholar/            ← Google Scholar (via SerpAPI)
-│   │   └── scholargps/                ← ScholarGPS (Selenium, optional)
+│   │   └── scholargps/                ← ScholarGPS (Selenium, manual CAPTCHA)
 │   └── utils/
 │       ├── faculty_loader.py          ← shared Excel loading utility
 │       ├── generate_top_N_faculty.py  ← auto-generates Top-N list from GS results
@@ -168,17 +200,21 @@ generate_top_N_faculty.py          (top N by GS citations + WoS ID lookup)
         ▼
 data/Top_N_Faculty_{year}.xlsx     ← review & fill in flagged rows
         │
-        ▼
-[1] WoS extractor                  (top N faculty, via Clarivate API)
-        │
-        ▼
-results/wos/WoS_Citations_Last_Five_Years.csv
-        │
-        ▼ auto (if both sources ran)
-comparison.py
-        │
-        ▼
-results/comparison/Comparison_Ranked.csv + charts
+        ├─────────────────────────────────────┐
+        ▼                                     ▼
+[1] WoS extractor                    [3] ScholarGPS extractor
+    (top N faculty, Clarivate API)       (top N faculty, Selenium)
+        │                                     │
+        ▼                                     ▼
+results/wos/                         results/scholargps/
+WoS_Citations_Last_Five_Years.csv    ScholarGPS_Citations_Last_Five_Years.csv
+        │                                     │
+        └──────────────┬──────────────────────┘
+                       ▼ auto (if 2+ sources ran)
+               comparison.py
+                       │
+                       ▼
+        results/comparison/Comparison_Ranked.csv + charts
 ```
 
 
@@ -188,8 +224,8 @@ results/comparison/Comparison_Ranked.csv + charts
 ```
   [1] Web of Science (WoS)
   [2] Google Scholar              ← run this first
-  [3] ScholarGPS  (optional, requires manual CAPTCHA solving)
-  [A] Run all active sources (WoS + Google Scholar)
+  [3] ScholarGPS  ⚠  (manual CAPTCHA required)
+  [A] Run all active sources (WoS + Google Scholar + ScholarGPS)
   [C] Cross-source comparison only
   [G] Generate Top-N faculty list from existing GS results
   [Q] Quit
@@ -206,6 +242,8 @@ results/comparison/Comparison_Ranked.csv + charts
 | `results/wos/` | `WoS_Citations_Last_Five_Years.csv` | Faculty rankings by WoS citations |
 | `results/google_scholar/` | `Google_Scholar_Publications_FULL.csv` | All GS publications |
 | `results/google_scholar/` | `Google_Scholar_Citations_Last_Five_Years.csv` | Faculty rankings by GS citations |
+| `results/scholargps/` | `ScholarGPS_Publications_FULL.csv` | All ScholarGPS publications |
+| `results/scholargps/` | `ScholarGPS_Citations_Last_Five_Years.csv` | Faculty rankings by ScholarGPS citations |
 | `results/comparison/` | `Comparison_Ranked.csv` | Cross-source ranking by average citations |
 | `results/comparison/` | `GPS_GS_citation_comparison.xlsx` | Formatted Excel comparison |
 | `results/comparison/` | `comparison_chart_*.png` | Bar chart visualisations |
