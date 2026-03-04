@@ -86,7 +86,7 @@ Before running the pipeline, update the faculty list for the new year:
 
    You should see the interactive menu:
 
-   <img src="doc_graph/sample_menu.png" alt="sample_menu" style="zoom:50%;" />
+   <img src="doc_graph/sample_menu.jpg" alt="sample_menu" style="zoom:50%;" />
 
    Select [2] ro tun Google Scholar First. 
 
