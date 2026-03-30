@@ -48,9 +48,10 @@ try:
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
-except ImportError:
-    print("[ScholarGPS] ERROR: selenium package not installed.")
-    print("  Run: pip install selenium")
+    from webdriver_manager.chrome import ChromeDriverManager
+except ImportError as e:
+    print(f"[ScholarGPS] ERROR: missing package — {e}")
+    print("  Run: pip install selenium webdriver-manager")
     sys.exit(1)
 
 
@@ -82,7 +83,7 @@ def _setup_driver() -> webdriver.Chrome:
     )
     chrome_options.add_argument(f"user-agent={user_agent}")
 
-    service = Service(config.CHROMEDRIVER_PATH)
+    service = Service(ChromeDriverManager().install())
     driver  = webdriver.Chrome(service=service, options=chrome_options)
     return driver
 

@@ -14,6 +14,12 @@ env/
 # Output data (may contain PII — store securely)
 results/
 
+# Faculty lists — contain PII (email, researcher IDs); store on Google Drive
+*Faculty*.xlsx
+
+# Data directory — auto-generated outputs and Top-N lists with researcher IDs; store on Google Drive
+data/
+
 # macOS metadata
 .DS_Store
 .AppleDouble

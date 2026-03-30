@@ -42,6 +42,13 @@ The ScholarGPS module extracts publication and citation data for the **Top-N fac
    - Or download manually from: https://chromedriver.chromium.org/downloads
    - After install, allow it in System Settings → Privacy & Security if prompted
 
+   > **Important — keep ChromeDriver up to date:** Chrome auto-updates itself but ChromeDriver does
+   > not. If they fall out of sync you will see a `SessionNotCreatedException` error. Fix it by running:
+   > ```bash
+   > brew upgrade --cask chromedriver
+   > ```
+   > Then go to **System Settings → Privacy & Security** and click **Allow Anyway** if macOS blocks it.
+
 4. **ChromeDriver path configured** (if not at the default `/usr/local/bin/chromedriver`):
    - Option A — set in `code/.env`:
      ```
@@ -128,6 +135,7 @@ All outputs are saved to `results/scholargps/`.
 | Department | |
 | Email | |
 | Faculty Type | |
+| ScholarGPS Profile Link | Full URL to the faculty's ScholarGPS profile |
 | Total Citations | Sum of "Cited By" for publications in year window |
 
 ### Output Schema: `ScholarGPS_Publications_FULL.csv`
@@ -178,8 +186,9 @@ SGPS_NAV_WAIT_MAX  = 7    # Maximum seconds between pagination clicks
 
 ## Citation Count Differences vs. WoS / Google Scholar
 
-- ScholarGPS citation counts are typically between WoS and Google Scholar counts.
-- ScholarGPS indexes peer-reviewed journals more broadly than WoS but is more selective than Google Scholar (which includes preprints and grey literature).
+- Expected trend: **Google Scholar > WoS > ScholarGPS**.
+- ScholarGPS is more selective than both GS and WoS — it focuses on peer-reviewed journals and may exclude preprints, working papers, and grey literature that GS and WoS include.
+- Large deviations from this trend (e.g. ScholarGPS >> WoS) are flagged automatically by the outlier report as potential profile mismatches.
 
 
 

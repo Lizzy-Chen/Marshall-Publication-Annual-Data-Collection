@@ -101,6 +101,7 @@ All outputs are saved to `results/google_scholar/`.
 | Department | |
 | Email | |
 | Faculty Type | |
+| Google Scholar Profile Link | Full URL to the faculty's Google Scholar profile |
 | Total Citations | Sum of "Cited By" for publications in year window |
 
 ### Output Schema: `Google_Scholar_Publications_FULL.csv`

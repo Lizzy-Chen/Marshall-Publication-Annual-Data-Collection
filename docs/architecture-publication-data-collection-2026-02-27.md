@@ -35,8 +35,7 @@ The Marshall Faculty Publication Data Collection system automates the extraction
 
 ### Scope
 
-- **Data Sources (2026 active):** Web of Science (WoS), Google Scholar (via SerpAPI)
-- **Data Sources (kept, not active in 2026):** ScholarGPS (Selenium scraping)
+- **Data Sources (2026 active):** Web of Science (WoS), Google Scholar (via SerpAPI), ScholarGPS (Selenium scraping)
 - **Faculty Coverage:** Full faculty list for Google Scholar; Top-50 filtered list for WoS and ScholarGPS
 - **Time Window:** Last 5 years (dynamic, calculated from current year)
 - **Outputs:** Per-source ranked publications and citation summaries, cross-source comparison
@@ -173,7 +172,7 @@ The following requirements most heavily influence design decisions:
 
 - **Choice:** Selenium + ChromeDriver
 - **Rationale:** ScholarGPS renders content via JavaScript; static HTML parsers (BeautifulSoup) cannot access it. Selenium drives a real browser.
-- **Trade-off:** Requires ChromeDriver installation. CAPTCHA blocking requires manual intervention. **Not active in 2026.**
+- **Trade-off:** Requires ChromeDriver installation. CAPTCHA blocking requires manual intervention (~30–60 min for a full run).
 
 **Credential Management**
 
@@ -226,11 +225,12 @@ selenium>=4.15.0
 **Key Design:**
 ```python
 SOURCES = {
-    "1": ("Web of Science",    wos_extractor,   wos_aggregator),
-    "2": ("Google Scholar",    gs_extractor,    gs_aggregator),
-    "3": ("ScholarGPS",        sgps_extractor,  sgps_aggregator),
-    "4": ("Cross-Source Comparison Only", None, None),
+    "1": ("Google Scholar",       gs_extractor,    gs_aggregator),   # run first
+    "2": ("Web of Science (WoS)", wos_extractor,   wos_aggregator),
+    "3": ("ScholarGPS",           sgps_extractor,  sgps_aggregator),
 }
+# Utility options: [A] all, [C] comparison, [G] generate Top-N, [O] outlier report
+# Advanced: [4] re-agg WoS, [5] re-agg GS, [6] re-agg ScholarGPS
 ```
 
 
@@ -324,11 +324,11 @@ FACULTY_KEY_COLS = [COL_LAST_NAME, COL_FIRST_NAME, COL_DEPARTMENT, COL_EMAIL, CO
 
 
 
-### Component 5: ScholarGPS Source Module (`sources/scholargps/`) — Kept, Not Active 2026
+### Component 5: ScholarGPS Source Module (`sources/scholargps/`) — Active 2026
 
 **Purpose:** Extract publication data via Selenium browser automation of ScholarGPS website.
 
-**Status:** Code is maintained and functional, but **not selected by default in 2026** due to CAPTCHA interruptions. Can be activated via the main.py menu when needed.
+**Status:** Active in 2026. Select **[3]** in `main.py`. Requires manual CAPTCHA solving — budget 30–60 minutes per run.
 
 **Sub-components:**
 - `extractor.py`: Selenium-driven browser automation. Handles CAPTCHA by pausing for manual intervention. Extracts publications across paginated pages.
@@ -345,23 +345,38 @@ FACULTY_KEY_COLS = [COL_LAST_NAME, COL_FIRST_NAME, COL_DEPARTMENT, COL_EMAIL, CO
 
 ### Component 6: `utils/comparison.py` — Cross-Source Comparison
 
-**Purpose:** Merge citation rankings from multiple sources, compute average citations, and produce visualizations.
+**Purpose:** Merge citation rankings from multiple sources, compute average rank across sources, and produce visualizations.
 
 **Responsibilities:**
 - Load citation ranking CSVs from available sources
 - INNER JOIN on faculty key columns
-- Calculate average citations across sources
-- Rank by average citations
+- Compute average rank across sources (lower = consistently ranked higher)
+- Sort by average rank ascending → assign `Overall_Rank`
+- Compute citation ratios (GS:WoS, SGPS:GS, SGPS:WoS)
 - Save `Comparison_Ranked.csv`
-- Generate comparison bar charts (PNG)
-- Generate Excel comparison file with formatting
+- Generate formatted Excel comparison file with outlier highlighting
+- Generate grouped bar chart (PNG)
+- Auto-invoke `outlier_report.py` on completion
 
 **Inputs:** Per-source `_Citations_Last_Five_Years.csv` files
 **Outputs:**
 - `results/comparison/Comparison_Ranked.csv`
-- `results/comparison/GPS_GS_citation_comparison.xlsx`
-- `results/comparison/comparison_chart_by_gs_rank.png`
-- `results/comparison/comparison_chart_by_sgps_rank.png`
+- `results/comparison/Citation_Comparison_All_Sources.xlsx`
+- `results/comparison/comparison_chart_all_sources.png`
+- `results/comparison/Outlier_Report.xlsx` (via outlier_report.py)
+
+### Component 6b: `utils/outlier_report.py` — Citation Anomaly Detection
+
+**Purpose:** Flag faculty with unusual citation patterns across sources for manual verification.
+
+**Responsibilities:**
+- Flag zero WoS citations with significant GS activity (≥ 20 citations)
+- Flag abnormal GS:WoS ratio (expected ~2.5; flag if < 1.0 or > 4.0)
+- Flag low SGPS:GS ratio (mean − 1.0 × cohort SD)
+- Output formatted Excel report with colour-coded rows
+
+**Inputs:** `results/comparison/Comparison_Ranked.csv`
+**Output:** `results/comparison/Outlier_Report.xlsx`
 
 
 
@@ -457,17 +472,25 @@ Produced by each aggregator:
 
 | Column | Type | Notes |
 |--------|------|-------|
-| Average_Citations_Rank | int | Ranked by average across sources |
+| Overall_Rank | int | Final rank by average source rank (1 = best) |
 | Last Name | string | |
 | First Name | string | |
 | Department | string | |
 | Email | string | |
 | Faculty Type | string | |
-| WoS_Rank | int | |
-| WoS_Total Citations | int | |
+| Google Scholar Profile Link | URL | |
+| WoS ResearchID | string | |
+| ScholarGPS Profile Link | URL | if ScholarGPS was run |
 | Google_Rank | int | |
 | Google_Total Citations | int | |
-| Average_Citations | float | Mean across available sources |
+| WoS_Rank | int | |
+| WoS_Total Citations | int | |
+| ScholarGPS_Rank | int | if ScholarGPS was run |
+| ScholarGPS_Total Citations | int | if ScholarGPS was run |
+| Average_Rank | float | Mean of source ranks (lower = better) |
+| GS_WoS_Ratio | float | GS ÷ WoS citations; expected ~2.5 |
+| SGPS_GS_Ratio | float | SGPS ÷ GS citations; if ScholarGPS was run |
+| SGPS_WoS_Ratio | float | SGPS ÷ WoS citations; if ScholarGPS was run |
 
 ### Data Flow
 
@@ -498,14 +521,21 @@ Faculty Excel Files
                           ▼
                comparison.py (if 2+ sources run)
                - INNER JOIN sources
-               - Average citations
-               - Rank + visualize
+               - Average rank across sources
+               - Ratio computation + visualize
                           │
                           ▼
-              Comparison_Ranked.csv + charts
+              Comparison_Ranked.csv + Citation_Comparison_All_Sources.xlsx + chart
+                          │
+                          ▼ auto
+               outlier_report.py
+               - Flag zero WoS / abnormal GS:WoS ratio / low SGPS ratio
+                          │
+                          ▼
+              Outlier_Report.xlsx
 ```
 
----
+
 
 ## 7. Directory & File Structure
 
@@ -538,7 +568,8 @@ Publication_Data_Collection_{year}/
 │   └── utils/
 │       ├── faculty_loader.py                # Shared faculty file loading
 │       ├── generate_top_N_faculty.py        # Auto-generates Top-N list from GS results
-│       └── comparison.py                    # Cross-source comparison & charts
+│       ├── comparison.py                    # Cross-source comparison & charts
+│       └── outlier_report.py               # Citation anomaly detection & flagging
 │
 ├── results/                                 # All outputs (auto-created)
 │   ├── wos/
@@ -570,6 +601,7 @@ cp code/.env.example code/.env
 # Edit .env and add:
 #   WOS_API_KEY=your_wos_key_here
 #   SERPAPI_KEY=your_serpapi_key_here
+#   CHROMEDRIVER_PATH=/path/to/chromedriver   # required for ScholarGPS only
 
 # 3. Ensure the master faculty list is in the project root
 # {year}_{semester}_Faculty_List.xlsx
@@ -590,16 +622,28 @@ python main.py
 ============================================================
   Year window: 2021–2025
 
-  Select data sources to run (comma-separated, e.g. 1,2):
+  Run in order:
 
-  [1] Web of Science (WoS)
-  [2] Google Scholar              ← run this first
-  [3] ScholarGPS  ⚠  (manual CAPTCHA required)  [not active in 2026]
+  [1] Google Scholar          ← always run first
+        Covers all faculty via SerpAPI.
+        Auto-generates Top-50 list when done — review before Step 2.
 
-  [A] Run all ACTIVE sources (WoS + Google Scholar)
-  [C] Cross-source comparison only (requires 2+ sources already run)
-  [G] Generate Top-N faculty list from existing GS results
+  [2] Web of Science          ← after reviewing Top-N list
+        Covers Top-N faculty via Clarivate API.
+
+  [3] ScholarGPS              ← can run alongside [2], requires manual CAPTCHA solving
+        Covers Top-N faculty via browser automation (~30–60 min).
+
+  [C] Compare + Outlier Report  ← after 2+ sources complete
+        Merges sources, ranks faculty, flags anomalies.
+
+  ──────────────────────────────────────────────────────────
+  [A] Run all sources at once  (1 → 2 → 3 → C)
   [Q] Quit
+
+  Advanced (not regularly needed):
+  [G] Regenerate Top-50 list   [O] Outlier report only
+  [4] Re-agg WoS   [5] Re-agg Google Scholar   [6] Re-agg ScholarGPS
 
   Your choice: _
 ```
@@ -634,6 +678,7 @@ After each source, the script prints:
 **Requirement:** The system must support adding new data sources (e.g., Scopus, OpenAlex) in future years with minimal code changes.
 
 **Solution:**
+
 - All sources follow the same pattern: `extractor.py` → CSV → `aggregator.py` → ranked CSVs
 - New source: create a new folder under `sources/`, implement extractor and aggregator following existing patterns, add an entry to `main.py`'s source menu
 - `config.py` centralizes path and column constants — new source adds its paths there
@@ -648,12 +693,13 @@ After each source, the script prints:
 **Requirement:** The operator must be able to run only specific sources per session (e.g., skip ScholarGPS due to CAPTCHA, run only WoS on a quick refresh).
 
 **Solution:**
-- `main.py` presents a numbered menu. User enters comma-separated selection.
-- Each source module is invoked independently. Selecting "1,2" runs only WoS and Google Scholar.
-- ScholarGPS is listed with a clear warning about CAPTCHA requirements.
-- "Run All Active" option runs WoS + Google Scholar only (excludes ScholarGPS by default).
+- `main.py` presents a numbered menu. User enters a single key or comma-separated selection.
+- Each source module is invoked independently. Selecting "2" runs only WoS; "1,2" runs Google Scholar then WoS.
+- ScholarGPS is listed with a clear note about manual CAPTCHA requirements.
+- "[A] Run all sources" runs all three sources in order (1 → 2 → 3) then auto-runs comparison.
+- Advanced options [4]/[5]/[6] allow re-running only the aggregation step for a source (skip re-extraction).
 
-**Validation:** User can run `python main.py`, select "1", and only WoS runs.
+**Validation:** User can run `python main.py`, select "2", and only WoS runs.
 
 ---
 
@@ -783,7 +829,7 @@ __pycache__/
 .DS_Store
 ```
 
----
+
 
 ## 11. Extensibility: Adding New Data Sources
 
@@ -935,7 +981,7 @@ No automated test suite is required for this research tool. Manual validation:
 - ✗ No query capability, manual aggregation required
 - Rationale: Research tools benefit from human-readable outputs; no web interface or API needed.
 
----
+
 
 ## 14. Changes from 2025
 
@@ -960,4 +1006,3 @@ No automated test suite is required for this research tool. Manual validation:
 ---
 
 *Architecture document prepared by: Lizzy Chen (LizzyChen@outlook.com)*
-*Based on analysis of 2025 system codebase and documentation*

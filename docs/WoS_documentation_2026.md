@@ -100,6 +100,7 @@ All outputs are saved to `results/wos/`.
 | Department | |
 | Email | |
 | Faculty Type | |
+| WoS ResearchID | Unique WoS author identifier (e.g. A-1234-5678) |
 | Total Citations | Sum of WoS citations for publications in year window |
 
 ### Output Schema: `WoS_Publications_FULL.csv`

@@ -44,12 +44,20 @@ def run() -> None:
     # ── Load data ─────────────────────────────────────────────────────────────
     df_pub = pd.read_csv(full_csv)
 
-    df_faculty = pd.read_excel(
-        config.FACULTY_TOP50_PATH,
-        usecols=config.FACULTY_KEY_COLS,
-    )
+    # Load faculty list, including the ScholarGPS profile URL as the authoritative source.
+    # The column is named "scholargps" in the faculty list; rename to "ScholarGPS Profile Link"
+    # for consistency with the rest of the pipeline.
+    # Reading from df_pub would lose the link for faculty whose extraction failed.
+    link_col        = "ScholarGPS Profile Link"
+    faculty_link_col = "scholargps"
+    top50_cols      = pd.read_excel(config.FACULTY_TOP50_PATH, nrows=0).columns.tolist()
+    load_cols       = config.FACULTY_KEY_COLS + ([faculty_link_col] if faculty_link_col in top50_cols else [])
+
+    df_faculty = pd.read_excel(config.FACULTY_TOP50_PATH, usecols=load_cols)
     for col in df_faculty.select_dtypes(include="object").columns:
         df_faculty[col] = df_faculty[col].str.strip()
+    if faculty_link_col in df_faculty.columns:
+        df_faculty = df_faculty.rename(columns={faculty_link_col: link_col})
 
     # ── Normalise types ───────────────────────────────────────────────────────
     df_pub[config.COL_PUB_YEAR] = pd.to_numeric(
@@ -89,6 +97,12 @@ def run() -> None:
     df_ranked.insert(0, config.COL_RANK, range(1, len(df_ranked) + 1))
     df_ranked.rename(columns={config.COL_CITED_BY: config.COL_TOTAL_CITES}, inplace=True)
 
+    # Place ScholarGPS Profile Link right before Total Citations (it came in via df_faculty)
+    if link_col in df_ranked.columns:
+        other_cols = [c for c in df_ranked.columns if c != link_col]
+        insert_at  = other_cols.index(config.COL_TOTAL_CITES)
+        df_ranked  = df_ranked[other_cols[:insert_at] + [link_col] + other_cols[insert_at:]]
+
     # ── Build ranked publications file ────────────────────────────────────────
     rank_lookup   = df_ranked[[config.COL_RANK] + config.FACULTY_KEY_COLS]
     df_pub_ranked = (
@@ -101,6 +115,7 @@ def run() -> None:
             ascending=[True, True, True, False],
         )
     )
+
     cols = [config.COL_RANK] + [c for c in df_pub_ranked.columns if c != config.COL_RANK]
     df_pub_ranked = df_pub_ranked[cols]
 

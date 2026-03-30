@@ -45,10 +45,12 @@ def run() -> None:
     df_pub = pd.read_csv(full_csv)
 
     # Load full top-50 faculty list for LEFT JOIN (ensures 0-citation faculty appear)
-    df_faculty = pd.read_excel(
-        config.FACULTY_TOP50_PATH,
-        usecols=config.FACULTY_KEY_COLS,
-    )
+    # Include WoS ResearchID if the column exists in the file
+    top50_cols = pd.read_excel(config.FACULTY_TOP50_PATH, nrows=0).columns.tolist()
+    id_col     = "WoS ResearchID" if "WoS ResearchID" in top50_cols else None
+    load_cols  = config.FACULTY_KEY_COLS + ([id_col] if id_col else [])
+
+    df_faculty = pd.read_excel(config.FACULTY_TOP50_PATH, usecols=load_cols)
     for col in df_faculty.select_dtypes(include="object").columns:
         df_faculty[col] = df_faculty[col].str.strip()
 
@@ -91,6 +93,13 @@ def run() -> None:
     # Add Rank column (1 = most citations)
     df_ranked.insert(0, config.COL_RANK, range(1, len(df_ranked) + 1))
     df_ranked.rename(columns={config.COL_CITATIONS: config.COL_TOTAL_CITES}, inplace=True)
+
+    # Move WoS ResearchID to appear right after the faculty key columns
+    if id_col and id_col in df_ranked.columns:
+        other_cols = [c for c in df_ranked.columns if c != id_col]
+        insert_at  = other_cols.index(config.COL_TOTAL_CITES)
+        cols_order = other_cols[:insert_at] + [id_col] + other_cols[insert_at:]
+        df_ranked  = df_ranked[cols_order]
 
     # ── Build ranked publications file ────────────────────────────────────────
     # Merge rank back into per-publication rows

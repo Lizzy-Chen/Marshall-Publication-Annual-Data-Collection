@@ -47,6 +47,20 @@ def run() -> None:
     # ── Load data ─────────────────────────────────────────────────────────────
     df_pub = pd.read_csv(full_csv)
 
+    # Load Google Scholar Profile Link from the faculty list (authoritative source).
+    # Reading from df_pub would lose the link for faculty whose extraction failed.
+    link_col  = "Google Scholar Profile Link"
+    full_cols = pd.read_excel(config.FACULTY_FULL_PATH, nrows=0).columns.tolist()
+    if link_col in full_cols:
+        df_links = pd.read_excel(
+            config.FACULTY_FULL_PATH,
+            usecols=config.FACULTY_KEY_COLS + [link_col],
+        )
+        for col in df_links.select_dtypes(include="object").columns:
+            df_links[col] = df_links[col].str.strip()
+    else:
+        df_links = None
+
     # ── Normalise types ───────────────────────────────────────────────────────
     df_pub[config.COL_PUB_YEAR] = pd.to_numeric(
         df_pub[config.COL_PUB_YEAR], errors="coerce"
@@ -81,6 +95,14 @@ def run() -> None:
     # Add Rank column
     df_agg.insert(0, config.COL_RANK, range(1, len(df_agg) + 1))
     df_agg.rename(columns={config.COL_CITED_BY: config.COL_TOTAL_CITES}, inplace=True)
+
+    # Add Google Scholar Profile Link from faculty list
+    if df_links is not None:
+        df_agg = df_agg.merge(df_links, on=config.FACULTY_KEY_COLS, how="left")
+        # Place link column right before Total Citations
+        other_cols = [c for c in df_agg.columns if c != link_col]
+        insert_at  = other_cols.index(config.COL_TOTAL_CITES)
+        df_agg     = df_agg[other_cols[:insert_at] + [link_col] + other_cols[insert_at:]]
 
     # ── Build ranked publications file ────────────────────────────────────────
     rank_lookup = df_agg[[config.COL_RANK] + config.FACULTY_KEY_COLS]
