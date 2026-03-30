@@ -246,7 +246,7 @@ Publication_Data_Collection_{year}/
     ├── google_scholar_documentation_2026.md
     ├── scholargps_documentation_2026.md
     ├── outlier_report_documentation_2026.md
-    └── data_issues_log.md
+    └── faculty_data_issues_log.md
 ```
 
 
@@ -311,7 +311,7 @@ The README covers everything needed to run the pipeline. The following docs are 
 - **Google Scholar details:** `docs/google_scholar_documentation_2026.md` — SerpAPI usage, profile matching
 - **ScholarGPS details:** `docs/scholargps_documentation_2026.md` — ChromeDriver setup, CAPTCHA handling
 - **Outlier report:** `docs/outlier_report_documentation_2026.md` — flagging logic and thresholds
-- **Data issues log:** `docs/data_issues_log.md` — known data quality issues and resolutions
+- **Faculty data issues log:** `docs/faculty_data_issues_log.md` — known faculty-specific data anomalies and resolutions
 
 
 

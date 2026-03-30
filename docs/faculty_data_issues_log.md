@@ -4,9 +4,28 @@ Running log of anomalies, discrepancies, and data quality issues observed during
 
 ---
 
+## 2024
+
+**Issue 001 — WoS Auto-Assigned IDs Are Unreliable (Systemic)**
+
+| Field | Detail |
+|-------|--------|
+| **Date noted** | ~2024 (discovered early in project) |
+| **Source** | Web of Science |
+| **Faculty affected** | All (systematic) |
+| **Issue** | Faculty who have not registered a verified WoS profile still appear in WoS records, but their publications are assigned an auto-generated ID based on name matching. This is unreliable in two directions: (1) faculty with common names may have publications from multiple authors merged under one ID (overcounting); (2) the same faculty member's publications may be split across multiple IDs (undercounting). |
+| **Cause** | WoS auto-assigns ResearchIDs algorithmically when a faculty member has not manually claimed and verified their profile. Name disambiguation by algorithm is estimated at ~60% accuracy. |
+| **Status** | Resolved — addressed in pipeline design |
+
+**Background:** Several approaches were tried early in the project — fuzzy name matching, second-pass name filtering, name + university filters, and re-searching using auto-generated IDs — but all produced unreliable results (~60% accuracy) and required extensive manual verification. The only reliable solution is a verified WoS profile registered and claimed by the faculty member themselves.
+
+**Resolution:** The current pipeline runs Google Scholar first to generate the Top-N faculty list, then collects verified WoS ResearchIDs directly from those faculty before running WoS extraction. Do not look up faculty by name and use the auto-assigned ID. If a faculty member is missing a verified WoS ResearchID, contact your supervisor to ask them to register and verify their profile at https://www.webofscience.com.
+
+---
+
 ## 2026
 
-**Issue 001 — WoS API vs. Website Citation Count Discrepancy**
+**Issue 002 — WoS API vs. Website Citation Count Discrepancy**
 
 | Field | Detail |
 |-------|--------|
@@ -20,7 +39,7 @@ Running log of anomalies, discrepancies, and data quality issues observed during
 
 
 
-**Issue 002 — Zero WoS Citations: Newly Created ResearchID Accounts**
+**Issue 003 — Zero WoS Citations: Newly Created ResearchID Accounts**
 
 | Field | Detail |
 |-------|--------|
@@ -34,7 +53,7 @@ Running log of anomalies, discrepancies, and data quality issues observed during
 
 
 
-**Issue 003 — ScholarGPS Profile Verification Needed**
+**Issue 004 — ScholarGPS Profile Verification Needed**
 
 | Field | Detail |
 |-------|--------|
@@ -48,7 +67,7 @@ Running log of anomalies, discrepancies, and data quality issues observed during
 
 
 
-**Issue 004 — WoS ResearchID Changed: Patricia Dechow**
+**Issue 005 — WoS ResearchID Changed: Patricia Dechow**
 
 | Field | Detail |
 |-------|--------|
