@@ -148,25 +148,28 @@ You should see the interactive menu:
   Your choice: _
 ```
 
-### Step 1 — Run Google Scholar
+**Step 1: Run Google Scholar**
 
-Select **[1]**. This covers all faculty and automatically generates `data/Top_N_Faculty_{year}.xlsx` when done.
+- Select **[1]**. This covers all faculty and automatically generates `data/Top_N_Faculty_{year}.xlsx` when done.
 
-### Step 2 — Review the Top-N list
+**Step 2: Review the Top-N list**
 
-Open `data/Top_N_Faculty_{year}.xlsx`. Gold-highlighted rows need attention — fill in any missing **WoS ResearchID** before continuing.
+- Open `data/Top_N_Faculty_{year}.xlsx`. Gold-highlighted rows need attention.
+- Fill in any missing **WoS ResearchID** before continuing.
 
-### Step 3 — Run Web of Science
+**Step 3: Run Web of Science**
 
-Select **[2]**. This covers Top-N faculty via the Clarivate API and generates ranked citation outputs.
+- Select **[2]**. This covers Top-N faculty via the Clarivate API and generates ranked citation outputs.
 
-### Step 4 — Run ScholarGPS *(requires manual CAPTCHA solving)*
+**Step 4: Run ScholarGPS** *(requires manual CAPTCHA solving)*
 
-ScholarGPS also uses the Top-N faculty list. Before running, ensure ChromeDriver is installed and matches your Chrome version (see `docs/scholargps_documentation_2026.md` for setup).
+- ScholarGPS also uses the Top-N faculty list. Before running, ensure ChromeDriver is installed and matches your Chrome version (see `docs/scholargps_documentation_2026.md` for setup).
 
-> **ChromeDriver version mismatch?** Chrome auto-updates but ChromeDriver does not. If you see a `SessionNotCreatedException` error, run `brew upgrade --cask chromedriver` to fix it, then allow it in **System Settings → Privacy & Security** if prompted.
+  > **If ChromeDriver version mismatch:**
+  >
+  > Chrome auto-updates but ChromeDriver does not. If you see a `SessionNotCreatedException` error, run `brew upgrade --cask chromedriver` to fix it, then allow it in **System Settings → Privacy & Security** if prompted.
 
-Select **[3]**. When a CAPTCHA appears in the Chrome window, solve it manually, then press **Enter** in the terminal to resume. Budget 30–60 minutes depending on how often CAPTCHAs appear.
+- Select **[3]**. When a CAPTCHA appears in the Chrome window, solve it manually, then press **Enter** in the terminal to resume. 
 
 > **Tip:** You can run all three sources in one go with **[A]**, but you must stay at the terminal to handle CAPTCHAs during the ScholarGPS stage.
 
