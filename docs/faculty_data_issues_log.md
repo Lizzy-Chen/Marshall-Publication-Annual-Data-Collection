@@ -53,21 +53,7 @@ Running log of anomalies, discrepancies, and data quality issues observed during
 
 
 
-**Issue 004 — ScholarGPS Profile Verification Needed**
-
-| Field | Detail |
-|-------|--------|
-| **Date noted** | 2026-03-23 |
-| **Source** | ScholarGPS |
-| **Faculty affected** | Christian Busch, Erica Jian, Mladen Kolar (and any others flagged by `Outlier_Report.xlsx`) |
-| **Issue** | ScholarGPS citation counts for these faculty are significantly off compared to Google Scholar and WoS, suggesting the profile URLs in the faculty list may point to wrong or mismatched profiles. |
-| **Cause** | ScholarGPS profiles are matched manually; a URL may link to a different person with a similar name, or the profile may be incomplete. |
-| **Status** | Pending — manual verification required |
-| **Resolution** | Open each faculty member's `scholargps` URL from `data/Top_50_Faculty_2026.xlsx` in a browser and confirm the profile belongs to the correct person (check name, institution, and publication list). If incorrect, find the right profile URL and update it in `2026_Spring_Faculty_List.xlsx`, then re-run ScholarGPS for the affected faculty. Update this entry once verified. |
-
-
-
-**Issue 005 — WoS ResearchID Changed: Patricia Dechow**
+**Issue 004 — WoS ResearchID Changed: Patricia Dechow**
 
 | Field | Detail |
 |-------|--------|
