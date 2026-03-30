@@ -296,12 +296,14 @@ For a 2026 run this yields **2021–2025**.
 
 ## Documentation
 
-- **Architecture:** `docs/architecture-publication-data-collection-2026-02-27.md`
-- **WoS details:** `docs/WoS_documentation_2026.md`
-- **Google Scholar details:** `docs/google_scholar_documentation_2026.md`
-- **ScholarGPS details:** `docs/scholargps_documentation_2026.md`
-- **Outlier report:** `docs/outlier_report_documentation_2026.md`
-- **Data issues log:** `docs/data_issues_log.md`
+The README covers everything needed to run the pipeline. The following docs are available if you need deeper detail on a specific source or want to understand the system design — no need to read them for a standard run.
+
+- **Architecture:** `docs/architecture-publication-data-collection-2026-02-27.md` — system design, component overview, data flow
+- **WoS details:** `docs/WoS_documentation_2026.md` — API setup, field mappings, known limitations
+- **Google Scholar details:** `docs/google_scholar_documentation_2026.md` — SerpAPI usage, profile matching
+- **ScholarGPS details:** `docs/scholargps_documentation_2026.md` — ChromeDriver setup, CAPTCHA handling
+- **Outlier report:** `docs/outlier_report_documentation_2026.md` — flagging logic and thresholds
+- **Data issues log:** `docs/data_issues_log.md` — known data quality issues and resolutions
 
 
 
