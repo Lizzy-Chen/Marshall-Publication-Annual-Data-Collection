@@ -100,7 +100,37 @@ Before running the pipeline, update the faculty list for the new year:
 
    You should see the interactive menu:
 
-   <img src="doc_graph/sample_menu.jpg" alt="sample_menu" style="zoom:50%;" />
+   ```
+   ==============================================================
+     Marshall Faculty Publication Data Collection — 2026
+   ==============================================================
+     Year window: 2021–2025
+
+     Run in order:
+
+     [1] Google Scholar          ← always run first
+           Covers all faculty via SerpAPI.
+           Auto-generates Top-50 list when done — review before Step 2.
+
+     [2] Web of Science          ← after reviewing Top-N list
+           Covers Top-N faculty via Clarivate API.
+
+     [3] ScholarGPS              ← can run alongside [2], requires manual CAPTCHA solving
+           Covers Top-N faculty via browser automation (~30–60 min).
+
+     [C] Compare + Outlier Report  ← after 2+ sources complete
+           Merges sources, ranks faculty, flags anomalies.
+
+     ──────────────────────────────────────────────────────────
+     [A] Run all sources at once  (1 → 2 → 3 → C)
+     [Q] Quit
+
+     Advanced (not regularly needed):
+     [G] Regenerate Top-50 list   [O] Outlier report only
+     [4] Re-agg WoS   [5] Re-agg Google Scholar   [6] Re-agg ScholarGPS
+
+     Your choice: _
+   ```
 
    Select [1] to run Google Scholar first.
 
