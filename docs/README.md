@@ -60,7 +60,7 @@ CHROMEDRIVER_PATH=/path/to/chromedriver   # required for ScholarGPS only
 Uses a shared lab account — **no registration needed**.
 
 - Account: avdresearch@marshall.usc.edu
-- Password: stored in `code/.env` (ask your supervisor if you don't have access)
+- Password: stored in the RA Handbook doc on Google Drive (ask your supervisor for access)
 - Log in at [https://serpapi.com/dashboard](https://serpapi.com/dashboard) and copy the API key
 
 **Web of Science (Clarivate)**
