@@ -186,9 +186,18 @@ SGPS_NAV_WAIT_MAX  = 7    # Maximum seconds between pagination clicks
 
 ## Citation Count Differences vs. WoS / Google Scholar
 
-- Expected trend: **Google Scholar > WoS > ScholarGPS**.
-- ScholarGPS is more selective than both GS and WoS — it focuses on peer-reviewed journals and may exclude preprints, working papers, and grey literature that GS and WoS include.
-- Large deviations from this trend (e.g. ScholarGPS >> WoS) are flagged automatically by the outlier report as potential profile mismatches.
+Expected trend: **Google Scholar > WoS > ScholarGPS**. ScholarGPS numbers are systematically lower than the other two sources — this is expected behaviour, not a data error. The main reasons:
+
+- **Co-author weighting (biggest factor):** ScholarGPS divides citation credit proportionally by number of co-authors. For example, a paper with 2 authors gives each author 0.5 citations, not 1. WoS and Google Scholar give full citation credit to every author. For faculty who frequently co-author, this alone can halve or more their ScholarGPS count.
+- **20+ author papers excluded entirely:** Publications with more than 20 co-authors are excluded from ScholarGPS profiles and ranking calculations.
+- **Self-citations excluded:** ScholarGPS removes self-citations from counts; WoS and GS do not by default.
+- **Narrower indexing scope:** Google Scholar casts the widest net (theses, preprints, books, conference papers, grey literature). ScholarGPS indexes fewer source types, leading to fewer citations found overall.
+
+Large deviations beyond this expected gap (e.g. ScholarGPS >> WoS, or a faculty member's ScholarGPS count is near zero while GS is high) are flagged automatically by the outlier report as potential profile mismatches — see `docs/outlier_report_documentation_2026.md`.
+
+**Sources:**
+- ScholarGPS Ranking Terminology and Methodology: https://scholargps.com/ranking-terminology-and-methodology
+- ScholarGPS FAQ: https://scholargps.com/faq
 
 
 
