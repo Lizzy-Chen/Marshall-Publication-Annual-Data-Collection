@@ -17,7 +17,7 @@ cd Marshall-Publication-Annual-Data-Collection
 
 **2. Get input files from Google Drive**
 
-- Faculty lists are **not committed to git** (they contain personal information — email addresses, researcher IDs). Download the current faculty list from the shared Google Drive project folder and place it in the project root:
+- Faculty lists are **not committed to git** (they contain personal information — email addresses, researcher IDs). Download the current faculty list from the shared drive project folder and place it in the project root:
   - `{year}_{semester}_Faculty_List.xlsx` → project root
 
 
@@ -62,7 +62,7 @@ cd Marshall-Publication-Annual-Data-Collection
 
   - Account: avdresearch@marshall.usc.edu
 
-  - Password: stored in the RA Handbook doc on Google Drive (ask your supervisor for access)
+  - Password: stored in the RA Handbook doc on shared drive (ask your supervisor for access)
 
   - Log in at [https://serpapi.com/dashboard](https://serpapi.com/dashboard) and copy the API key
 
@@ -216,8 +216,8 @@ The faculty list is the single master file. It should contain:
 
 ```
 Publication_Data_Collection_{year}/
-├── {year}_{semester}_Faculty_List.xlsx ← master faculty + ID file (not in git — use Google Drive)
-├── data/                              ← auto-generated files (not in git — use Google Drive)
+├── {year}_{semester}_Faculty_List.xlsx ← master faculty + ID file (not in git — use drive)
+├── data/                              ← auto-generated files (not in git — use drive)
 ├── results/                           ← all extraction outputs (auto-created, not in git)
 │   ├── wos/
 │   ├── google_scholar/
